@@ -55,7 +55,7 @@ class Graph():
 			# the set of vertices not yet processed.
 			# x is always equal to src in first iteration
             x = self.minDistance(dist, sptSet)
-            print('via: ' + str(x))
+
 			# Put the minimum distance vertex in the
 			# shortest path tree
             sptSet[x] = True
@@ -67,20 +67,17 @@ class Graph():
                 if self.graph[x][y] > 0 and sptSet[y] == False and \
 						dist[y] > dist[x] + self.graph[x][y]:
                     dist[y] = dist[x] + self.graph[x][y]
-                    print('to: '+ str(y))
 
                     prevStep = path[x].copy()
-                    tmp = path[y].copy()[1:]
+                    tmp = []
                     tmp.append(y)
 
                     prevStep.extend(tmp)
                     path[y] = prevStep
 
-            print("--------------------------------")
             if x == trg:
                 break
 
-        self.printSolution(dist, path)
         return path[trg]
 
 
@@ -88,7 +85,7 @@ class Graph():
 if __name__ == "__main__":
 	g = Graph(28)
 	g.graph =  [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], #0
-                [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], #1
+                [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], #1
                 [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ], #2
                 [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 ], #3
                 [0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0 ], #4
@@ -118,6 +115,6 @@ if __name__ == "__main__":
                 #0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27
 			]
 
-	print(g.dijkstra(1, 9))
+	print(g.dijkstra(2, 0))
 
 
