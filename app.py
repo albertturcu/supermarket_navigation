@@ -13,10 +13,10 @@ class Graph():
         self.graph = [[0 for column in range(vertices)]
 					for row in range(vertices)]
 
-    def printSolution(self, dist):
+    def printSolution(self, dist, path):
         print("Vertex \tDistance from Source")
         for node in range(self.V):
-            print(node, "\t", dist[node])
+            print(node, "\t", dist[node], "\t", path[node])
 
 	# A utility function to find the vertex with
 	# minimum distance value, from the set of vertices
@@ -38,22 +38,27 @@ class Graph():
 	# Function that implements Dijkstra's single source
 	# shortest path algorithm for a graph represented
 	# using adjacency matrix representation
-    def dijkstra(self, src):
+    def dijkstra(self, src, trg):
 
         dist = [sys.maxsize] * self.V
         dist[src] = 0
         sptSet = [False] * self.V
+
+        path = []
+        # Iterate over a sequence of numbers from 0 to 4
+        for i in range(self.V):
+            # In each iteration, add an empty list to the main list
+            path.append([src])
 
         for cout in range(self.V):
 			# Pick the minimum distance vertex from
 			# the set of vertices not yet processed.
 			# x is always equal to src in first iteration
             x = self.minDistance(dist, sptSet)
-
+            print('via: ' + str(x))
 			# Put the minimum distance vertex in the
 			# shortest path tree
             sptSet[x] = True
-
 			# Update dist value of the adjacent vertices
 			# of the picked vertex only if the current
 			# distance is greater than new distance and
@@ -62,8 +67,21 @@ class Graph():
                 if self.graph[x][y] > 0 and sptSet[y] == False and \
 						dist[y] > dist[x] + self.graph[x][y]:
                     dist[y] = dist[x] + self.graph[x][y]
+                    print('to: '+ str(y))
 
-        self.printSolution(dist)
+                    prevStep = path[x].copy()
+                    tmp = path[y].copy()[1:]
+                    tmp.append(y)
+
+                    prevStep.extend(tmp)
+                    path[y] = prevStep
+
+            print("--------------------------------")
+            if x == trg:
+                break
+
+        self.printSolution(dist, path)
+        return path[trg]
 
 
 # Driver's code
@@ -100,6 +118,6 @@ if __name__ == "__main__":
                 #0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27
 			]
 
-	g.dijkstra(2)
+	print(g.dijkstra(1, 9))
 
 
