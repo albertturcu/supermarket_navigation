@@ -4,6 +4,7 @@ c.execute("""CREATE TABLE groceries1
     (
         uniq_id text,
         name text,
+        list_price text, 
         brand tetx,
         category text
         position_x int,
