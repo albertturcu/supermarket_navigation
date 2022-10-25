@@ -1,27 +1,12 @@
-# import sqlite3
-
-# c.execute("""CREATE TABLE groceries1
-#     (
-#         uniq_id text,
-#         name text,
-#         list_price text, 
-#         brand tetx,
-#         category text
-#         position_x int,
-#         position_y int,
-#         )""")
-
-# with open('data/products/data_groceries.csv', 'r') as file:
-#     for index, row in file:
-
-#         c.execute("INSERT INTO groceries1(uniq_id, name, brand, category, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?)", row.split(';'))
-#         conn.commit()
-
 import sqlite3, csv
 
 conn = sqlite3.connect('super_market_database.db')
 
 c = conn.cursor()
+
+data = c.execute("SELECT node FROM layout WHERE category = 'milk\n' ")
+print( "The node is:", data.fetchall())
+
 
 # c.execute("""CREATE TABLE layout
 #         (
@@ -39,11 +24,11 @@ c = conn.cursor()
 
 
 
-with open('data\layout\layout.csv', 'r') as file:
-    no_records = 0
-    for row in file:
-        c.execute("INSERT INTO layout(node, category) VALUES (?,?)", row.split(';'))
-        conn.commit()
-        no_records += 1
-conn.close()
-print('\n{} Records transferred'.format(no_records))
+# with open('data\layout\layout.csv', 'r') as file:
+#     no_records = 0
+#     for row in file:
+#         c.execute("INSERT INTO layout(node, category) VALUES (?,?)", row.split(';'))
+#         conn.commit()
+#         no_records += 1
+# conn.close()
+# print('\n{} Records transferred'.format(no_records))
