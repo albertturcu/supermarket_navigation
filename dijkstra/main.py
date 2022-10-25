@@ -47,7 +47,6 @@ class Graph():
 	# shortest path algorithm for a graph represented
 	# using adjacency matrix representation
     def dijkstra(self, src, trg):
-
         dist = [sys.maxsize] * self.V
         dist[src] = 0
         sptSet = [False] * self.V

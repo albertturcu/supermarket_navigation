@@ -1,11 +1,33 @@
 import sqlite3, csv
-def search_function(word):
 
-    w = word
+# this method returns similar products to a given key with a limit of 10 rows
+def get_similar_products(word):
     conn = sqlite3.connect('super_market_database.db')
     c = conn.cursor()
-    data = c.execute("SELECT * FROM products WHERE category LIKE '%'||?||'%' or name LIKE '%'||?||'%'",(w,w,) )
+    data = c.execute("SELECT * FROM products WHERE category LIKE '%'||?||'%' or name LIKE '%'||?||'%' LIMIT 10",(word,word,) )
 
     result = data.fetchall()
     tuple = result
     return tuple
+
+
+## this method returns the path to the given id of a product
+def get_product(id):
+    conn = sqlite3.connect('super_market_database.db')
+    conn.row_factory = sqlite3.Row
+
+    c = conn.cursor()
+
+    product_raw = c.execute("SELECT * FROM products WHERE uniq_id = ?",(id,) )
+    rows = product_raw.fetchall()
+    prod = dict(zip(rows[0].keys(), rows[0]))
+    print(prod['category'])
+
+    layout_raw = c.execute("SELECT * FROM layout WHERE category LIKE '%'||?||'%'",(prod['category'],) )
+    rows = layout_raw.fetchall()
+    layout = dict(zip(rows[0].keys(), rows[0]))
+    print(layout['node'])
+
+    prod['node'] = layout['node']
+
+    return prod
