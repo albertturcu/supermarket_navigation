@@ -1,6 +1,6 @@
 # EXPO REACT NATIVE APP
 
-##How to run the app:
+## How to run the app:
 
 1. In terminal/command line navigate to the project folder and inside */frontend/supermarket_navigation*
 2. For android execute: `npm run android`
