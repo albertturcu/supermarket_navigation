@@ -1,24 +1,26 @@
 import { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, SafeAreaView } from 'react-native'
+import { View, StyleSheet, FlatList, SafeAreaView, Pressable } from 'react-native'
 import { Appbar, Searchbar, Text } from 'react-native-paper';
 
-const Item = ({ item }) => (
-  <View style={styles.item}>
-    <Text style={styles.productName}>{item[1]}</Text>
-    <Text style={styles.brand}>{item[3]}</Text>
-    <Text style={styles.price}>{item[2]}</Text>
-  </View>
+const Item = ({ item, navigation }) => (
+  <Pressable onPress={() => navigation.navigate("Item", { id: item[0] })}>
+    <View style={styles.item}>
+      <Text style={styles.productName}>{item[1]}</Text>
+      <Text style={styles.brand}>{item[3]}</Text>
+      <Text style={styles.price}>{item[2]}</Text>
+    </View>
+  </Pressable>
 );
 
 
-export default function Search() {
+export default function Search({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('')
   const onChangeQuery = query => setSearchQuery(query)
   
   const [searchResults, setSearchResults] = useState([])
 
   const renderItem = ({ item }) => (
-    <Item item={item} />
+    <Item item={item} navigation={navigation} />
   );
 
   useEffect(() => {
@@ -43,9 +45,6 @@ export default function Search() {
 
   return (
       <SafeAreaView>
-        <Appbar.Header>
-          <Appbar.Content title='Store Name' />
-        </Appbar.Header>
         <View>
           <Searchbar
             placeholder='Search'
