@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, TextInput, TouchableWithoutFeedback, View, Keyboard} from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import Search from './Components/Search';
-import Item from './Components/Item';
+import PathView from './Components/PathView';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -17,8 +17,8 @@ export default function App() {
             name="Search"
             component={Search} />
           <Stack.Screen 
-            name="Item"
-            component={Item} />
+            name="PathView"
+            component={PathView} />
         </Stack.Navigator>
       </PaperProvider>
     </NavigationContainer>
