@@ -29,5 +29,7 @@ def get_product(id):
     print(layout['node'])
 
     prod['node'] = layout['node']
+    prod['shelf_width'] = layout['width']
+    prod['shelf_height'] = layout['height']
 
     return prod
