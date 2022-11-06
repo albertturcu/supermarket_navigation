@@ -37,7 +37,7 @@ export default function PathView({navigation, route}) {
             { item != null ?
             <View>
                 <Text>Name: {item.name}</Text>
-                <Svg height='90%' width='100%' viewBox='0 0 180 380'>
+                <Svg height='80%' width='100%' viewBox='0 0 180 380'>
                     {
                         shelves.map((shelve, key) => {
                             return (
@@ -57,11 +57,13 @@ export default function PathView({navigation, route}) {
                                 d={path}
                                 fill='none'
                                 stroke="red"
+                                strokeWidth={3}
                             />
                         :
                             null
                     }
                 </Svg>
+
             </View>
             : null}
         </View>
