@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Rect, Path } from 'react-native-svg';
-import { Node, Shelf } from '../Models/LayoutModel'
+import { Node, Shelf, Product } from '../Models/LayoutModel'
 
 export default function PathView({navigation, route}) {
     const [item, setItem] = useState(null)
     const [path, setPath] = useState(null)
+    const [shelfLayout, setShelfLayout] = useState(null)
 
     useEffect(() => {
         fetchProduct()
@@ -28,6 +29,7 @@ export default function PathView({navigation, route}) {
                 }
             })
             setPath(pathForSVG.toString())
+            setShelfLayout(calculateSelectedShelfLayout(json.data.shelf_height, json.data.shelf_width, json.data.position_y, json.data.position_x))
         } catch (error) {
             console.error(error)
         }
@@ -37,7 +39,7 @@ export default function PathView({navigation, route}) {
             { item != null ?
             <View>
                 <Text>Name: {item.name}</Text>
-                <Svg height='80%' width='100%' viewBox='0 0 180 380'>
+                <Svg height='70%' width='100%' viewBox='0 0 180 380'>
                     {
                         shelves.map((shelve, key) => {
                             return (
@@ -63,11 +65,76 @@ export default function PathView({navigation, route}) {
                             null
                     }
                 </Svg>
-
+                <Svg height='20%' width='100%' viewBox='0 0 300 100'>
+                    <Rect 
+                        x='0'
+                        y='0'
+                        height='100'
+                        width='300'
+                        stroke='black'
+                        fill='red'
+                        strokeWidth='2'
+                    />
+                    {
+                        shelfLayout != null ?
+                            shelfLayout.map((product) => {
+                                return (
+                                    <Rect
+                                        key={product.id}
+                                        x={product.x}
+                                        y={product.y}
+                                        height={product.height}
+                                        width={product.width}
+                                        stroke='pink'
+                                        fill={product.isSelected ? 'red' : 'orange'}
+                                    />
+                                )
+                            })
+                        :
+                        null
+                    }
+                </Svg>
             </View>
             : null}
         </View>
     )
+}
+
+const calculateSelectedShelfLayout = (shelfHeight, shelfWidth, selectedColumn, selectedRow) => {
+    // set total height and width from SVG
+    // TODO figure out a way to remove this hardcoded value and connect it with the svg viewbox values
+    let totalWidth = 300
+    let totalHeight = 100
+
+    // start x,y coordinates from 0(top left corner)
+    var x = 0
+    var y = 0
+
+    //calculate width and height of each product in the shelf
+    let width = totalWidth / (shelfWidth + 1)
+    let height = totalHeight / (shelfHeight + 1)
+
+    var productsArray = []
+
+    let selectedId = `${selectedColumn}-${selectedRow}`
+
+    // loop through the shelf width and height, which corresponds to how many rows and columns with items does the shelf have
+    for (var i=0; i<shelfHeight + 1; i++) {
+        for (var j=0; j<shelfWidth + 1; j++) {
+            // need a unique id to assign as an element key when drawing svg
+            let id = `${i}-${j}`
+            let isSelected = id == selectedId ? true : false
+            let tempProduct = new Product(id, x, y, height, width, isSelected)
+            productsArray.push(tempProduct)
+            // increase the x for the next product in the same row
+            x += width
+        }
+        // increase height to move into the next row
+        y += height
+        // reset the x coordinate to start at the begining of the next row
+        x = 0
+    }
+    return productsArray
 }
 
 const shelves = [
