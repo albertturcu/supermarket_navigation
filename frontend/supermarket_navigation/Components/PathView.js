@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from 'react-native-paper';
-import Svg, {Rect, Path} from 'react-native-svg';
-import {Node, Shelf} from '../Models/LayoutModel'
+import Svg, { Rect, Path } from 'react-native-svg';
+import { Node, Shelf } from '../Models/LayoutModel'
 
 export default function PathView({navigation, route}) {
     const [item, setItem] = useState(null)

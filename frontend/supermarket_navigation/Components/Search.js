@@ -3,11 +3,11 @@ import { View, StyleSheet, FlatList, SafeAreaView, Pressable } from 'react-nativ
 import { Appbar, Searchbar, Text } from 'react-native-paper';
 
 const Item = ({ item, navigation }) => (
-  <Pressable onPress={() => navigation.navigate("PathView", { id: item[0] })}>
+  <Pressable onPress={() => navigation.navigate("PathView", { id: item.uniq_id })}>
     <View style={styles.item}>
-      <Text style={styles.productName}>{item[1]}</Text>
-      <Text style={styles.brand}>{item[3]}</Text>
-      <Text style={styles.price}>{item[2]}</Text>
+      <Text style={styles.productName}>{item.name}</Text>
+      <Text style={styles.brand}>{item.brand}</Text>
+      <Text style={styles.price}>{item.list_price}</Text>
     </View>
   </Pressable>
 );
@@ -59,7 +59,7 @@ export default function Search({ navigation }) {
               <FlatList
               data={searchResults}
               renderItem={renderItem}
-              keyExtractor={item => item[0]}
+              keyExtractor={item => item.uniq_id}
               />
             </View> 
             :
