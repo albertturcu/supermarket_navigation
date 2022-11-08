@@ -1,11 +1,17 @@
+class Coordinates {
+    constructor(x, y) {
+        this.x = x
+        this.y = y
+    }
+}
+
 /**
  * @param {number} x Coordinate for x position of a node
  * @param {number} y Coordinate for y position of a node
  */
-export class Node {
+export class Node extends Coordinates {
     constructor(x, y) {
-        this.x = x
-        this.y = y
+        super(x, y)
     }
 }
 
@@ -16,10 +22,9 @@ export class Node {
  * @param {number} width Width of a shelf
  * @param {string} color Color of a shelf
  */
-export class Shelf {
+export class Shelf extends Coordinates {
     constructor(x, y, height, width, color) {
-        this.x = x
-        this.y = y
+        super(x, y)
         this.height = height
         this.width = width
         this.color = color
@@ -34,11 +39,10 @@ export class Shelf {
  * @param {number} width Width of the product
  * @param {boolean} isSelected True if the instance is of the product that we are looking for
  */
-export class Product {
+export class Product extends Coordinates {
     constructor(id, x, y, height, width, selected) {
+        super(x, y)
         this.id = id
-        this.x = x
-        this.y = y
         this.height = height,
         this.width = width
         this.isSelected = selected
