@@ -39,3 +39,5 @@ def get_product(id):
     prod['shelf_height'] = layout['height']
 
     return prod
+
+
