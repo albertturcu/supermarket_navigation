@@ -1,5 +1,4 @@
-from flask import Flask, request, jsonify, abort
-from flask_restful import Resource, Api 
+from flask import Flask, request, jsonify, abort 
 
 def get_paginated_list(results, url, start, limit):
     start = int(start)
