@@ -1,7 +1,7 @@
 from flask import Flask, request, url_for,render_template, redirect, jsonify
 from dijkstra.main import Graph
 from storage.db import Database
-from storage.models.product import get_similar_products, get_product, add_product, get_categories, update_product
+from storage.models.product import get_similar_products, get_product, add_product, get_categories, update_product, count_similar_products
 from storage.models.paging import get_paginated_list
 import uuid
 
@@ -30,14 +30,15 @@ def index():
 @app.route('/search_result', methods=['GET'])
 def search_result():
     if request.method == 'GET':
-        #page = request.args.get('page', 1, type=int)
         args = request.args
         name = args.get('name')
-        data = get_paginated_list(get_similar_products(name), 
-            '/search_result?name=' + name, 
-            start=request.args.get('start', 1), 
-            limit=request.args.get('limit', 5)
-    )
+        page = int(args.get('page', 1))
+        limit = int(args.get('limit', 5))
+
+        result = get_similar_products(name, page, limit)
+        count = count_similar_products(name)
+        url = '/search_result?name=' + name
+        data = get_paginated_list(result, count, url, page, limit)
 
     return jsonify(isError= False,
                 message= "Success",

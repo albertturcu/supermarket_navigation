@@ -1,31 +1,33 @@
 from flask import Flask, request, jsonify, abort 
 
-def get_paginated_list(results, url, start, limit):
-    start = int(start)
+def get_paginated_list(results, count, url, page, limit):
+    page = int(page)
     limit = int(limit)
-    count = len(results)
-    if count < start or limit < 0:
+
+    if count < page or limit < 0:
         abort(404)
+
     # make response
     obj = {}
-    obj['start'] = start
+    obj['page'] = page
     obj['limit'] = limit
     obj['count'] = count
+    obj['results'] = results
+
     # make URLs
     # make previous url
-    if start == 1:
+    if page == 1:
         obj['previous'] = ''
     else:
-        start_copy = max(1, start - limit)
-        limit_copy = start - 1
-        obj['previous'] = url + '&start=%d&limit=%d' % (start_copy, limit_copy)
+        start_copy = page - 1
+        obj['previous'] = url + '&page=%d&limit=%d' % (start_copy, limit)
+
     # make next url
-    if start + limit > count:
+    if page * limit >= count:
         obj['next'] = ''
     else:
-        start_copy = start + limit
-        obj['next'] = url + '&start=%d&limit=%d' % (start_copy, limit)
-    # finally extract result according to bounds
-    obj['results'] = results[(start - 1):(start - 1 + limit)]
+        start_copy = page + 1
+        obj['next'] = url + '&page=%d&limit=%d' % (start_copy, limit)
+
     return obj
 

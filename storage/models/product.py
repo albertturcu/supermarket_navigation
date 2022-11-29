@@ -1,13 +1,13 @@
 import sqlite3, csv
 
 # this method returns similar products to a given key with a limit of 10 rows
-def get_similar_products(word):
+def get_similar_products(word, page, limit):
     conn = sqlite3.connect('super_market_database.db')
     conn.row_factory = sqlite3.Row
-
     c = conn.cursor()
 
-    data = c.execute("SELECT * FROM products WHERE category LIKE '%'||?||'%' or name LIKE '%'||?||'%' LIMIT 10",(word,word,) )
+    offset = (page - 1) * limit
+    data = c.execute("SELECT * FROM products WHERE category LIKE '%'||?||'%' or name LIKE '%'||?||'%' LIMIT ? OFFSET ?",(word,word,limit,offset,) )
 
     rows = data.fetchall()
     result = []
@@ -16,6 +16,21 @@ def get_similar_products(word):
 
     return result
 
+def count_similar_products(word):
+    conn = sqlite3.connect('super_market_database.db')
+    conn.row_factory = sqlite3.Row
+    count = 0
+
+    c = conn.cursor()
+
+    data = c.execute("SELECT count(*) FROM products WHERE category LIKE '%'||?||'%' or name LIKE '%'||?||'%'",(word,word,) )
+
+    rows = data.fetchall()
+
+    for row in rows:
+        count = row[0]
+
+    return count
 
 ## this method returns the path to the given id of a product
 def get_product(id):
