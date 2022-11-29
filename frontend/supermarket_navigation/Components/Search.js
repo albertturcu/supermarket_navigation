@@ -31,9 +31,9 @@ export default function Search({ navigation }) {
   const searchAsync = async () => {
     try {
       if (searchQuery != '') {
-        const response = await fetch('https://supermarket-navigation.herokuapp.com/search_result?name=' + searchQuery);
+        const response = await fetch('https://supermarket-navigation.herokuapp.com/search_result?name=' + searchQuery + '&start=' + 6 + '&limit=' + 5);
         const json = await response.json();
-        setSearchResults(json.data)
+        setSearchResults(json.data.results)
       } else {
         setSearchResults([])
       }

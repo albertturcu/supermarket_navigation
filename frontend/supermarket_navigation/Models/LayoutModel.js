@@ -43,7 +43,7 @@ export class Product extends Coordinates {
     constructor(id, x, y, height, width, selected) {
         super(x, y)
         this.id = id
-        this.height = height,
+        this.height = height
         this.width = width
         this.isSelected = selected
     }
