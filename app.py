@@ -1,7 +1,9 @@
 from flask import Flask, request, url_for,render_template, redirect, jsonify
 from dijkstra.main import Graph
 from storage.db import Database
-from storage.models.product import get_similar_products, get_product
+from storage.models.product import get_similar_products, get_product, add_product, get_categories, update_product
+from storage.models.paging import get_paginated_list
+import uuid
 
 app = Flask(__name__)
 
@@ -28,17 +30,27 @@ def index():
 @app.route('/search_result', methods=['GET'])
 def search_result():
     if request.method == 'GET':
+        #page = request.args.get('page', 1, type=int)
         args = request.args
         name = args.get('name')
-        data = get_similar_products(name)
+        data = get_paginated_list(get_similar_products(name), 
+            '/search_result?name=' + name, 
+            start=request.args.get('start', 1), 
+            limit=request.args.get('limit', 5)
+    )
 
     return jsonify(isError= False,
                 message= "Success",
                 statusCode= 200,
                 data= data), 200
 
-@app.route('/product', methods=['GET'])
+@app.route('/product', methods=['GET', 'POST', 'PATCH'])
 def product():
+    data = None
+    isError = False
+    message = "Success"
+    statusCode = 200
+
     if request.method == 'GET':
         args = request.args
         product_id = args.get('id')
@@ -51,10 +63,66 @@ def product():
 
         data['path'] = path
 
-    return jsonify(isError= False,
-                message= "Success",
-                statusCode= 200,
-                data= data), 200
+    if request.method == 'POST':
+        json_data = request.get_json()
+
+        uniq_id = uuid.uuid4().hex
+        name = json_data['name']
+        list_price = json_data['list_price']
+        brand = json_data['brand']
+        category = json_data['category']
+
+        err = add_product(uniq_id, name, list_price, brand, category)
+        if err is not None:
+            statusCode = 400
+            message = err
+            isError = True
+
+    if request.method == 'PATCH':
+        json_data = request.get_json()
+
+        try:
+            uniq_id = json_data['uniq_id']
+            name = json_data['name']
+            list_price = json_data['list_price']
+            brand = json_data['brand']
+            category = json_data['category']
+            position_x = json_data['position_x']
+            position_y = json_data['position_y']
+        except KeyError as key_error:
+            statusCode = 400
+            message =   f"Missing required key {key_error}"
+            isError = True
+
+        if isError is False:
+            err = update_product(uniq_id, name, list_price, brand, category, position_x, position_y)
+
+            if err is not None:
+                statusCode = 400
+                message = err
+                isError = True
+
+    return jsonify(isError= isError,
+                message= message,
+                statusCode= statusCode,
+                data= data), statusCode
+
+@app.route('/category', methods=['GET'])
+def category():
+    data = None
+    isError = False
+    message = "Success"
+    statusCode = 200
+
+    if request.method == 'GET':
+        data = get_categories()
+        print(data)
+
+    return jsonify(isError= isError,
+                message= message,
+                statusCode= statusCode,
+                data= data), statusCode
+
 
 
 if __name__ == '__main__':
