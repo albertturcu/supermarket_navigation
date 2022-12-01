@@ -16,6 +16,10 @@ const Item = ({ item, navigation }) => (
 export default function Search({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('')
   const onChangeQuery = query => setSearchQuery(query)
+
+  const defaultPageNumber = 1
+  const [page, setPage] = useState(defaultPageNumber)
+  const limit = 10
   
   const [searchResults, setSearchResults] = useState([])
 
@@ -26,14 +30,27 @@ export default function Search({ navigation }) {
   useEffect(() => {
     // clear search results when user makes changes to the searched value
     setSearchResults([])
+    // set page number to default
+    setPage(defaultPageNumber)
   }, [searchQuery])
+
+  useEffect(() => {
+    // fetch new page when page number changes
+    searchAsync()
+  }, [page])
 
   const searchAsync = async () => {
     try {
       if (searchQuery != '') {
-        const response = await fetch('https://supermarket-navigation.herokuapp.com/search_result?name=' + searchQuery + '&start=' + 6 + '&limit=' + 5);
+        const response = await fetch('https://supermarket-navigation.herokuapp.com/search_result?name=' + searchQuery + '&page=' + page + '&limit=' + limit);
         const json = await response.json();
-        setSearchResults(json.data.results)
+        console.log(json)
+        if (json.data.results.length != 0) {
+          // concat the old and new array, otherwise the old page would get overwritten
+          setSearchResults(searchResults => searchResults.concat(json.data.results))  
+        } else {
+          console.log('no more results on this page')
+        }
       } else {
         setSearchResults([])
       }
@@ -59,6 +76,7 @@ export default function Search({ navigation }) {
               data={searchResults}
               renderItem={renderItem}
               keyExtractor={item => item.uniq_id}
+              onEndReached={() => setPage(page+1)}
               />
             </View> 
             :
