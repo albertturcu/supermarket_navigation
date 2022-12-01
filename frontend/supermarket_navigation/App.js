@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './screens/Home';
 import ManageStore from './screens/ManageStore';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 const Tab = createBottomTabNavigator();
 
@@ -11,12 +12,29 @@ export default function App() {
   return (
     <NavigationContainer>
       <PaperProvider>
-        <Tab.Navigator>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconName
+
+              if (route.name === 'Home') {
+                iconName = focused
+                  ? 'store-search'
+                  : 'store-search-outline'
+              } else if (route.name === 'Manage Store') {
+                iconName = focused
+                  ? 'store-edit'
+                  : 'store-edit-outline'
+              }
+              return <Icon name={iconName} size={size} color={color} />
+            }
+          })}>
           <Tab.Screen
             name='Home'
-            component={Home} />
+            component={Home}
+            tabBarIcon='store-search' />
           <Tab.Screen
-            name='ManageStore'
+            name='Manage Store'
             component={ManageStore} />
         </Tab.Navigator>
       </PaperProvider>
