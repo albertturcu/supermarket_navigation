@@ -128,7 +128,7 @@ def category():
 def health():
     print("start algorithm")
     if request.method == 'GET':
-        message="Success"
+        message="Success."
 
     return jsonify(isError= False,
                 message=message,
