@@ -92,7 +92,7 @@ def product():
             position_y = json_data['position_y']
         except KeyError as key_error:
             statusCode = 400
-            message =   f"Missing required key {key_error}"
+            message =   f"Missing required key {key_error}."
             isError = True
 
         if isError is False:
