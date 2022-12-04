@@ -13,8 +13,8 @@ export default function App() {
     <NavigationContainer>
       <PaperProvider>
         <Tab.Navigator
-          screenOptions={({ route }) => ({
-            tabBarIcon: ({ focused, color, size }) => {
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ focused, color, size }) => {
               let iconName
 
               if (route.name === 'Home') {
