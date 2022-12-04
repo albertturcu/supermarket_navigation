@@ -124,7 +124,16 @@ def category():
                 statusCode= statusCode,
                 data= data), statusCode
 
+@app.route('/', methods=['GET'])
+def health():
+    print("start algorithm")
+    if request.method == 'GET':
+        message="Success"
 
+    return jsonify(isError= False,
+                message=message,
+                statusCode= 200,
+                data=None), 200
 
 if __name__ == '__main__':
     conn = Database()
