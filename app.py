@@ -92,7 +92,7 @@ def product():
             position_y = json_data['position_y']
         except KeyError as key_error:
             statusCode = 400
-            message =   f"Missing required key {key_error}"
+            message =   f"Missing required key {key_error}."
             isError = True
 
         if isError is False:
@@ -124,7 +124,16 @@ def category():
                 statusCode= statusCode,
                 data= data), statusCode
 
+@app.route('/', methods=['GET'])
+def health():
+    print("start algorithm")
+    if request.method == 'GET':
+        message="Success."
 
+    return jsonify(isError= False,
+                message=message,
+                statusCode= 200,
+                data=None), 200
 
 if __name__ == '__main__':
     conn = Database()
