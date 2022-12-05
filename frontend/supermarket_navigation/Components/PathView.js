@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Rect, Path } from 'react-native-svg';
 import { Node, Shelf, Product } from '../Models/LayoutModel'
+import {API_BASE_URL} from '@env'
 
 export default function PathView({navigation, route}) {
     const [item, setItem] = useState(null)
@@ -16,7 +17,7 @@ export default function PathView({navigation, route}) {
 
     const fetchProduct = async () => {
         try {
-            const response = await fetch('https://supermarket-navigation.herokuapp.com/product?id=' + route.params.id);
+            const response = await fetch(`${API_BASE_URL}` + 'product?id=' + route.params.id);
             const json = await response.json();
             setItem(json.data)
             const pathForSVG = json.data.path.map((point) => {

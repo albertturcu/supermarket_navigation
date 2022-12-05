@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Text, SafeAreaView, Keyboard, TouchableWithoutFeedback, View, StyleSheet } from 'react-native'
 import { Button, TextInput, Drawer, Divider } from 'react-native-paper'
 import DropDownPicker from 'react-native-dropdown-picker'
+import {API_BASE_URL} from '@env'
 
 class Category {
     constructor(label, value) {
@@ -11,10 +12,10 @@ class Category {
 }
 
 class Product {
-    constructor(name, brand, price, category) {
+    constructor(name, brand, list_price, category) {
         this.name = name
         this.brand = brand
-        this.price = price
+        this.list_price = list_price
         this.category = category
     }
 }
@@ -35,11 +36,9 @@ export default function ManageStore() {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch('https://supermarket-navigation.herokuapp.com/category')
-            // const json = await response.json()
-            // const data = await json.data
-            // TODO mock data while api is down
-            const data = ["seafood", 'milk', 'auto_moto']
+            const response = await fetch(`${API_BASE_URL}` + 'category')
+            const json = await response.json()
+            const data = await json.data
             const modifiedData = data.map((value) => {
                 // capitalize first letter of the category name
                 let label = value[0].toUpperCase() + value.substring(1)
@@ -56,15 +55,15 @@ export default function ManageStore() {
     const addProduct = async () => {
         try {
             const payload = new Product(name, brand, price, category)
-            const response = await fetch('https://supermarket-navigation.herokuapp.com/product', {
+            console.log(payload)
+            console.log(JSON.stringify(payload))
+            await fetch(`${API_BASE_URL}` + 'product', {
                 method: 'POST',
-                header: {
-                    Accept: 'application/json',
+                headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(payload)
             })
-            console.log(response)
         } catch (error) {
             console.error(error)
         }
