@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, SafeAreaView, Pressable } from 'react-native'
-import { Appbar, Searchbar, Text } from 'react-native-paper';
+import { Searchbar, Text } from 'react-native-paper';
+import { API_BASE_URL } from '@env'
 
 const Item = ({ item, navigation }) => (
   <Pressable onPress={() => navigation.navigate("PathView", { id: item.uniq_id })}>
@@ -42,7 +43,7 @@ export default function Search({ navigation }) {
   const searchAsync = async () => {
     try {
       if (searchQuery != '') {
-        const response = await fetch('https://supermarket-navigation.herokuapp.com/search_result?name=' + searchQuery + '&page=' + page + '&limit=' + limit);
+        const response = await fetch(`${API_BASE_URL}` + 'search_result?name=' + searchQuery + '&page=' + page + '&limit=' + limit);
         const json = await response.json();
         console.log(json)
         if (json.data.results.length != 0) {
