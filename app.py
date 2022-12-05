@@ -53,6 +53,7 @@ def product():
     statusCode = 200
 
     if request.method == 'GET':
+        print("GET")
         args = request.args
         product_id = args.get('id')
         data = get_product(product_id)
@@ -65,6 +66,7 @@ def product():
         data['path'] = path
 
     if request.method == 'POST':
+        print("POST")
         json_data = request.get_json()
 
         uniq_id = uuid.uuid4().hex
@@ -80,6 +82,7 @@ def product():
             isError = True
 
     if request.method == 'PATCH':
+        print("PATCH")
         json_data = request.get_json()
 
         try:
