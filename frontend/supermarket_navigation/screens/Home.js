@@ -10,7 +10,8 @@ export default function Home() {
         <Stack.Navigator>
             <Stack.Screen 
                 name="Search"
-                component={Search} />
+                component={Search}
+                />
             <Stack.Screen 
                 name="PathView"
                 component={PathView} />

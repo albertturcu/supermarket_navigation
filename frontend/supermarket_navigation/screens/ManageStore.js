@@ -3,6 +3,9 @@ import { Text, SafeAreaView, Keyboard, TouchableWithoutFeedback, View, StyleShee
 import { Button, TextInput, Drawer, Divider } from 'react-native-paper'
 import DropDownPicker from 'react-native-dropdown-picker'
 import {API_BASE_URL} from '@env'
+import ManageProductSearch from '../Components/ManageProductSearch'
+import EditProduct from "../Components/EditProduct"
+import {createNativeStackNavigator} from '@react-navigation/native-stack'
 
 class Category {
     constructor(label, value) {
@@ -20,6 +23,8 @@ class Product {
     }
 }
 
+const Stack = createNativeStackNavigator()
+
 export default function ManageStore() {
     // input state
     const [name, setName] = useState(null)
@@ -29,6 +34,8 @@ export default function ManageStore() {
     const [open, setOpen] = useState(false)
     const [category, setCategory] = useState(null)
     const [items, setItems] = useState([])
+    // screen selection - 0 for add product, 1 for modifying product
+    const [screen, setScreen] = useState(0)
 
     useEffect(() => {
         fetchCategories()
@@ -55,8 +62,6 @@ export default function ManageStore() {
     const addProduct = async () => {
         try {
             const payload = new Product(name, brand, price, category)
-            console.log(payload)
-            console.log(JSON.stringify(payload))
             await fetch(`${API_BASE_URL}` + 'product', {
                 method: 'POST',
                 headers: {
@@ -64,6 +69,11 @@ export default function ManageStore() {
                 },
                 body: JSON.stringify(payload)
             })
+            setName(null)
+            setBrand(null)
+            setPrice(null)
+            setCategory(null)
+
         } catch (error) {
             console.error(error)
         }
@@ -72,44 +82,56 @@ export default function ManageStore() {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <SafeAreaView style={{flex:1}}>
-                <View style={styles.optionsContainer}>
-                    <Button style={styles.optionsButton}>Add Product</Button>
-                    <Button style={styles.optionsButton}>Update Product</Button>
-                </View>
-                <Divider />
-                <View style={{margin: 10}}>
-                    <Text style={styles.input}>Product Name</Text>
-                    <TextInput 
-                        placeholder='Product Name'
-                        value={name}
-                        onChangeText={(input) => setName(input)}
-                        style={styles.input}
-                    />
-                    <Text style={styles.input}>Brand</Text>
-                    <TextInput 
-                        placeholder='Brand'
-                        value={brand}
-                        onChangeText={(input) => setBrand(input)}
-                        style={styles.input}
-                    />
-                    <Text style={styles.input}>Price</Text>
-                    <TextInput 
-                        placeholder='Price'
-                        value={price}
-                        onChangeText={(input) => setPrice(input)}
-                        style={styles.input}
-                    />
-                    <Text style={styles.input}>Category</Text>
-                    <DropDownPicker 
-                        open={open}
-                        value={category}
-                        items={items}
-                        setOpen={setOpen}
-                        setValue={setCategory}
-                        setItems={setItems}
-                    />
-                    <Button onPress={() => addProduct()} style={styles.submitButton}>Add Product</Button>
-                </View>
+                    <View style={styles.optionsContainer}>
+                        <Button style={styles.optionsButton} onPress={() => setScreen(0)}>Add Product</Button>
+                        <Button style={styles.optionsButton} onPress={() => setScreen(1)}>Edit Product</Button>
+                    </View>
+                    <Divider />
+            {
+                screen === 0 ?
+                    <View style={{margin: 10}}>
+                        <Text style={styles.input}>Product Name</Text>
+                        <TextInput 
+                            placeholder='Product Name'
+                            value={name}
+                            onChangeText={(input) => setName(input)}
+                            style={styles.input}
+                        />
+                        <Text style={styles.input}>Brand</Text>
+                        <TextInput 
+                            placeholder='Brand'
+                            value={brand}
+                            onChangeText={(input) => setBrand(input)}
+                            style={styles.input}
+                        />
+                        <Text style={styles.input}>Price</Text>
+                        <TextInput 
+                            placeholder='Price'
+                            value={price}
+                            onChangeText={(input) => setPrice(input)}
+                            style={styles.input}
+                        />
+                        <Text style={styles.input}>Category</Text>
+                        <DropDownPicker 
+                            open={open}
+                            value={category}
+                            items={items}
+                            setOpen={setOpen}
+                            setValue={setCategory}
+                            setItems={setItems}
+                        />
+                        <Button onPress={() => addProduct()} style={styles.submitButton}>Add Product</Button>
+                    </View>
+                :
+                <Stack.Navigator>
+                    <Stack.Screen 
+                        component={ManageProductSearch}
+                        name="ManageProductSearch"/>
+                    <Stack.Screen 
+                        component={EditProduct}
+                        name="Edit Product"/>
+                </Stack.Navigator>
+            }
             </SafeAreaView>
         </TouchableWithoutFeedback>
     )

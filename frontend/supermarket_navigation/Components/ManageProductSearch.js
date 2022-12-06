@@ -4,7 +4,7 @@ import { Searchbar, Text } from 'react-native-paper';
 import { API_BASE_URL } from '@env'
 
 const Item = ({ item, navigation }) => (
-  <Pressable onPress={() => navigation.navigate("PathView", { id: item.uniq_id })}>
+  <Pressable onPress={() => navigation.navigate("Edit Product", { id: item.uniq_id })}>
     <View style={styles.item}>
       <Text style={styles.productName}>{item.name}</Text>
       <Text style={styles.brand}>{item.brand}</Text>
@@ -13,8 +13,7 @@ const Item = ({ item, navigation }) => (
   </Pressable>
 );
 
-
-export default function Search({ navigation }) {
+export default function ManageProductSearch({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('')
   const onChangeQuery = query => setSearchQuery(query)
 
@@ -48,7 +47,6 @@ export default function Search({ navigation }) {
     })
     return () => unsubscribe()
   }, [navigation])
-
 
   const searchAsync = async () => {
     try {
