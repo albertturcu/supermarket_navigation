@@ -64,8 +64,7 @@ def update_product(uniq_id, name, list_price, brand, category, position_x, posit
 
     product = c.execute("SELECT * FROM products WHERE uniq_id = ?", (uniq_id, ))
     rows = product.fetchall()
-    print("find product")
-    print(rows)
+
     if len(rows) > 0:
         print("product found")
         prod = dict(zip(rows[0].keys(), rows[0]))
@@ -90,36 +89,36 @@ def update_product(uniq_id, name, list_price, brand, category, position_x, posit
             print("different category")
             product = c.execute("DELETE FROM products WHERE uniq_id = ?", (uniq_id, ))
 
-        # find max width
-        position_x = c.execute(
-            "SELECT max(position_x) as max_position_x FROM products WHERE category=?", (category,)
-        )
-        rows = position_x.fetchall()
-        position_x = dict(zip(rows[0].keys(), rows[0]))
-
-        # find max height
-        position_y = c.execute(
-            "SELECT max(position_y) as max_position_y FROM products WHERE position_x = ? and category=?", (position_x['max_position_x'], category,)
-        )
-        rows = position_y.fetchall()
-        position_y = dict(zip(rows[0].keys(), rows[0]))
-
-        # calculate next position on shelf
-        if position_y['max_position_y'] >= 5:
-            position_x = position_x['max_position_x'] + 1
-            position_y = 0
-        else:
-            position_x = position_x['max_position_x']
-            position_y = position_y['max_position_y'] + 1
-
-        # insert new product
-        try:
-            c.execute(
-                "INSERT INTO products VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (uniq_id, name, list_price, brand, category, position_x, position_y,)
+            # find max width
+            position_x = c.execute(
+                "SELECT max(position_x) as max_position_x FROM products WHERE category=?", (category,)
             )
-        except sqlite3.Error as er:
-            return er
+            rows = position_x.fetchall()
+            position_x = dict(zip(rows[0].keys(), rows[0]))
+
+            # find max height
+            position_y = c.execute(
+                "SELECT max(position_y) as max_position_y FROM products WHERE position_x = ? and category=?", (position_x['max_position_x'], category,)
+            )
+            rows = position_y.fetchall()
+            position_y = dict(zip(rows[0].keys(), rows[0]))
+
+            # calculate next position on shelf
+            if position_y['max_position_y'] >= 5:
+                position_x = position_x['max_position_x'] + 1
+                position_y = 0
+            else:
+                position_x = position_x['max_position_x']
+                position_y = position_y['max_position_y'] + 1
+
+            # insert new product
+            try:
+                c.execute(
+                    "INSERT INTO products VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (uniq_id, name, list_price, brand, category, position_x, position_y,)
+                )
+            except sqlite3.Error as er:
+                return er
 
         # update layout max width and height
         position_y = c.execute(
