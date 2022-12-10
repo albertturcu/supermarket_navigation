@@ -3,7 +3,6 @@ import { View } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Rect, Path } from 'react-native-svg';
 import { Node, Shelf, Product } from '../Models/LayoutModel'
-import {API_BASE_URL} from '@env'
 import StoreServices from '../services/storeServices';
 
 const api = new StoreServices

@@ -1,5 +1,5 @@
 import {API_BASE_URL} from '@env'
-import {BackendProduct, FrontendProduct, TempProduct} from '../Models/DataModels'
+import {BackendProduct, FrontendProduct} from '../Models/DataModels'
 
 export default class StoreServices {
     // API product PATCH method
@@ -42,7 +42,6 @@ export default class StoreServices {
                 } else {
                     const data = json.data
                     const product = new FrontendProduct(data.uniq_id, data.name, data.brand, data.list_price, data.category, data.position_x, data.position_y, data.path, data.shelf_width, data.shelf_height)
-                    // resolve({xPositions: tempXPositions, yPositions: tempYPositions, product: product})
                     resolve(product)
                 }
             })
@@ -51,7 +50,7 @@ export default class StoreServices {
     }
     addProduct(input) {
         return new Promise((resolve, reject) => {
-            const payload = new TempProduct(input.name, input.brand, input.price, input.category)
+            const payload = new BackendProduct(null, input.name, input.brand, input.price, input.category, null, null)
             fetch(`${API_BASE_URL}` + 'product', {
                 method: 'POST',
                 headers: {
