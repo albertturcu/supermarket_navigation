@@ -14,6 +14,7 @@ export default function App() {
       <PaperProvider>
         <Tab.Navigator
           screenOptions={({ route }) => ({
+            headerShown: false,
             tabBarIcon: ({ focused, color, size }) => {
               let iconName
 
