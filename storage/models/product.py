@@ -13,7 +13,7 @@ def get_similar_products(word, page, limit, **kwargs):
     result = []
     for row in rows:
         cols = [desc[0] for desc in c.description]
-        result.append(dict(zip(cols, rows[0])))
+        result.append(dict(zip(cols, row)))
 
     return result
 
