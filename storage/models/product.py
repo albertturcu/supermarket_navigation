@@ -126,27 +126,27 @@ def update_product(uniq_id, name, list_price, brand, category, position_x, posit
     return None
 
 @with_connection
-def add_product(uniq_id, name, list_price, brand, category, **kwargs):
+def add_product(uniq_id, name, list_price, brand, category, position_x, position_y, **kwargs):
     c = kwargs.pop("connection").cursor()
 
-    query = "SELECT max(position_x) as max_position_x FROM products WHERE category='{}'".format(category)
-    c.execute(query)
-    rows = c.fetchall()
-    cols = [desc[0] for desc in c.description]
-    position_x = dict(zip(cols, rows[0]))
+    # query = "SELECT max(position_x) as max_position_x FROM products WHERE category='{}'".format(category)
+    # c.execute(query)
+    # rows = c.fetchall()
+    # cols = [desc[0] for desc in c.description]
+    # position_x = dict(zip(cols, rows[0]))
 
-    query = "SELECT max(position_y) as max_position_y FROM products WHERE position_x = {} and category='{}'".format(position_x['max_position_x'], category)
-    position_y = c.execute(query)
-    rows = position_y.fetchall()
-    cols = [desc[0] for desc in c.description]
-    position_y = dict(zip(cols, rows[0]))
+    # query = "SELECT max(position_y) as max_position_y FROM products WHERE position_x = {} and category='{}'".format(position_x['max_position_x'], category)
+    # position_y = c.execute(query)
+    # rows = position_y.fetchall()
+    # cols = [desc[0] for desc in c.description]
+    # position_y = dict(zip(cols, rows[0]))
 
-    if position_y['max_position_y'] >= 5:
-        position_x = position_x['max_position_x'] + 1
-        position_y = 0
-    else:
-        position_x = position_x['max_position_x']
-        position_y = position_y['max_position_y'] + 1
+    # if position_y['max_position_y'] >= 5:
+    #     position_x = position_x['max_position_x'] + 1
+    #     position_y = 0
+    # else:
+    #     position_x = position_x['max_position_x']
+    #     position_y = position_y['max_position_y'] + 1
 
     try:
         query = "INSERT INTO products VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(uniq_id, name, list_price, brand, category, position_x, position_y)
@@ -161,7 +161,14 @@ def add_product(uniq_id, name, list_price, brand, category, **kwargs):
     cols = [desc[0] for desc in c.description]
     position_y = dict(zip(cols, rows[0]))
 
-    query = "UPDATE layout SET width = {}, height = {} WHERE category = '{}'".format(position_x, position_y['max_position_y'], category)
+    query = "SELECT max(position_x) as max_position_x FROM products WHERE category='{}'".format(category)
+    c.execute(query)
+    rows = c.fetchall()
+    cols = [desc[0] for desc in c.description]
+    position_x = dict(zip(cols, rows[0]))
+
+
+    query = "UPDATE layout SET width = {}, height = {} WHERE category = '{}'".format(position_x['max_position_x'], position_y['max_position_y'], category)
     c.execute(query)
 
     return None

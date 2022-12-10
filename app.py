@@ -55,12 +55,7 @@ def product():
         print("GET")
         args = request.args
         product_id = args.get('id')
-        with_empty_spots = args.get('with_empty_spots', default=False, type=lambda v: v.lower() == 'true')
         data = get_product(product_id)
-
-        if with_empty_spots:
-            empty_spots = empty_spots_in_category(data['category'])
-            data['empty_spots'] = empty_spots
 
         g = Graph()
         start_point = int(0)
@@ -78,8 +73,10 @@ def product():
         list_price = json_data['list_price']
         brand = json_data['brand']
         category = json_data['category']
+        position_x = json_data['position_x']
+        position_y = json_data['position_y']
 
-        err = add_product(uniq_id, name, list_price, brand, category)
+        err = add_product(uniq_id, name, list_price, brand, category, position_x, position_y)
         if err is not None:
             statusCode = 400
             message = err
