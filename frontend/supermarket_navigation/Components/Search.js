@@ -1,20 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
 import { View, StyleSheet, FlatList, SafeAreaView, Pressable } from 'react-native'
-import { Searchbar, Text } from 'react-native-paper';
-import { API_BASE_URL } from '@env'
+import { Searchbar, Text } from 'react-native-paper'
+import StoreServices from '../services/storeServices'
 
-const Item = ({ item, navigation }) => (
-  <Pressable onPress={() => navigation.navigate("PathView", { id: item.uniq_id })}>
+const api = new StoreServices
+
+const Item = ({ item, navigation, navigateTo }) => (
+  <Pressable onPress={() => navigation.navigate(navigateTo, { id: item.uniq_id })}>
     <View style={styles.item}>
       <Text style={styles.productName}>{item.name}</Text>
       <Text style={styles.brand}>{item.brand}</Text>
       <Text style={styles.price}>{item.list_price}</Text>
     </View>
   </Pressable>
-);
+)
 
-
-export default function Search({ navigation }) {
+export default function Search({ navigation, route }) {
   const [searchQuery, setSearchQuery] = useState('')
   const onChangeQuery = query => setSearchQuery(query)
 
@@ -25,48 +26,42 @@ export default function Search({ navigation }) {
   const [searchResults, setSearchResults] = useState([])
 
   const renderItem = ({ item }) => (
-    <Item item={item} navigation={navigation} />
+    <Item item={item} navigation={navigation} navigateTo={route.params.navigateTo} />
   )
+
+  const resetQuery = () => {
+    setSearchResults([])
+    setPage(defaultPageNumber)
+  }
 
   useEffect(() => {
     // clear search results when user makes changes to the searched value
-    setSearchResults([])
-    // set page number to default
-    setPage(defaultPageNumber)
+    resetQuery()
   }, [searchQuery])
 
   useEffect(() => {
     // fetch new page when page number changes
-    searchAsync()
+    search()
   }, [page])
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      setSearchResults([])
-      // set page number to default
-      setPage(defaultPageNumber)
+      resetQuery()
     })
     return () => unsubscribe()
   }, [navigation])
 
 
-  const searchAsync = async () => {
-    try {
+  const search = () => {
       if (searchQuery != '') {
-        const response = await fetch(`${API_BASE_URL}` + 'search_result?name=' + searchQuery + '&page=' + page + '&limit=' + limit);
-        const json = await response.json();
-        if (json.data.results.length != 0) {
-          // concat the old and new array, otherwise the old page would get overwritten
-          setSearchResults(searchResults => searchResults.concat(json.data.results))  
-        } else {
-          console.log('no more results on this page')
-        }
+        api.searchProducts(searchQuery, page, limit)
+          .then((response) => {
+            setSearchResults(oldSearchResults => oldSearchResults.concat(response))
+          })
+          .catch((error) => error === "No more results on this page!" ? console.log(error) : console.error(error))
       } else {
         setSearchResults([])
       }
-    } catch (error) {
-      console.error(error)
-    }
   }
 
   return (
@@ -76,8 +71,8 @@ export default function Search({ navigation }) {
             placeholder='Search'
             onChangeText={onChangeQuery}
             value={searchQuery}
-            onSubmitEditing={() => searchAsync()}
-            onIconPress={() => searchAsync()}
+            onSubmitEditing={() => search()}
+            onIconPress={() => search()}
           />
           {
             searchResults != [] ?

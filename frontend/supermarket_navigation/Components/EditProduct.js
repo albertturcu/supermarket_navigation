@@ -1,161 +1,150 @@
 import React, {useState, useEffect} from 'react'
 import { SafeAreaView, Text, View, StyleSheet } from 'react-native'
-import { TextInput, Button } from 'react-native-paper'
+import { TextInput, Button, Dialog, Portal, Paragraph } from 'react-native-paper'
 import DropDownPicker from 'react-native-dropdown-picker'
-import {API_BASE_URL} from '@env'
+import StoreServices from '../services/storeServices'
+import { DropdownElement } from '../Models/DataModels'
 
-class DropdownElement {
-    constructor(label, value) {
-        this.label = label
-        this.value = value
-    }
-}
-
-class Product {
-    constructor(id, name, brand, list_price, category, position_x, position_y) {
-        this.uniq_id = id
-        this.name = name
-        this.brand = brand
-        this.list_price = list_price
-        this.category = category
-        this.position_x = position_x
-        this.position_y = position_y
-    }
-}
+const api = new StoreServices()
 
 export default function EditProduct({navigation, route}) {
     // input state
-    const [name, setName] = useState(null)
-    const [brand, setBrand] = useState(null)
-    const [price, setPrice] = useState(null)
+    const [input, setInput] = useState({id: null, name: null, brand: null, price: null, category: null, xPosition: null, yPosition: null})
     // category dropdown state
     const [openCategory, setOpenCategory] = useState(false)
-    const [category, setCategory] = useState(null)
-    const [items, setItems] = useState([])
+    const [categories, setCategories] = useState([])
     // y position drowdown state
     const [openYPosition, setOpenYPosition] = useState(false)
-    const [yPosition, setYPosition] = useState(null)
     const [yPositions, setYPositions] = useState([])
     // x position drowdown state
     const [openXPosition, setOpenXPosition] = useState(false)
-    const [xPosition, setXPosition] = useState(null)
     const [xPositions, setXPositions] = useState([])
 
-    const [id, setId] = useState(null)
+    // dialog state
+    const [visible, setVisible] = React.useState(false);
+
+    const showDialog = () => setVisible(true);
+
+    const hideDialog = () => setVisible(false);
 
     useEffect(() => {
-        fetchCategories()
+        api.getAllCategories()
+            .then((response) => {
+                const modifiedData = response.map((value) => {
+                    // capitalize first letter of the category name
+                    let label = value[0].toUpperCase() + value.substring(1)
+                    // get rid of the underscore from the category name for label in dropdown
+                    let modifiedLabel = label.replace(/_/g, ' ')
+                    return new DropdownElement(modifiedLabel, value)
+                })
+                setCategories(modifiedData)
+            })
+            .catch((error) => console.error(error))
+        api.getProduct(route.params.id)
+            .then((response) => {
+                setInput({
+                    id: response.id,
+                    name: response.name,
+                    brand: response.brand,
+                    price: response.price,
+                    category: response.category,
+                    xPosition: response.xPosition,
+                    yPosition: response.yPosition
+                })
+                // iterate over shelfWidth to show all x positions for dropdown
+                let tempXPositions = []
+                for (let i=1; i<=response.shelfWidth+1; i++) {
+                    tempXPositions.push(new DropdownElement(i, i))
+                }
+                // iterate over shelfHeight to show all y positions for dropdown
+                let tempYPositions = []
+                for (let i=1; i<=response.shelfHeight+1; i++) {
+                    tempYPositions.push(new DropdownElement(i, i))
+                }
+                setXPositions(tempXPositions)
+                setYPositions(tempYPositions)
+            })
+            .catch((error) => console.error(error))
     }, [])
 
-    const fetchCategories = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}` + 'category')
-            const json = await response.json()
-            const data = await json.data
-            const modifiedData = data.map((value) => {
-                // capitalize first letter of the category name
-                let label = value[0].toUpperCase() + value.substring(1)
-                // get rid of the underscore from the category name for label in dropdown
-                let modifiedLabel = label.replace(/_/g, ' ')
-                return new DropdownElement(modifiedLabel, value)
-            })
-            setItems(modifiedData)
-        } catch (error) {
-            console.error(error)
-        }
-    }
-    
-    useEffect(() => {
-        fetchProduct()
-    }, [])
 
-    const fetchProduct = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}` + 'product?id=' + route.params.id);
-            const json = await response.json();
-            console.log(json.data)
-            setName(json.data.name)
-            setBrand(json.data.brand)
-            setPrice(json.data.list_price)
-            setCategory(json.data.category)
-            setId(json.data.uniq_id)
-            setYPosition(json.data.position_y + 1)
-            setXPosition(json.data.position_x + 1)
-            // iterate over shelf_width to show all x positions for dropdown
-            var tempXPositions = []
-            for (let i=1; i<=json.data.shelf_width+1; i++) {
-                tempXPositions.push(new DropdownElement(i, i))
-            }
-            setXPositions(tempXPositions)
-            // iterate over shelf_height to show all y positions for dropdown
-            var tempYPositions = []
-            for (let i=1; i<=json.data.shelf_height+1; i++) {
-                tempYPositions.push(new DropdownElement(i, i))
-            }
-            setYPositions(tempYPositions)
-        } catch (error) {
-            console.error(error)
-        }
-    }
-
-    const editProduct = async () => {
-        try {
-            const payload = new Product(id, name, brand, price, category, xPosition - 1, yPosition - 1)
-            await fetch(`${API_BASE_URL}` + 'product', {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
+    const editProduct = () => {
+        api.editProduct(input)
+            .then(navigation.goBack())
+            .catch((error) => {
+                showDialog()
+                console.log(error)
             })
-            await navigation.goBack()
-        } catch (error) {
-            console.error(error)
-        }
     }
 
     return (
         <SafeAreaView style={{flex: 1}}>
+            <Portal>
+                <Dialog visible={visible} onDismiss={hideDialog}>
+                    <Dialog.Title>Something went wrong...</Dialog.Title>
+                    <Dialog.Content>
+                    <Paragraph>We were not able to save your edit. Please check your inputs and try again.</Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                    <Button onPress={hideDialog}>Ok</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
             <View style={{margin: 10}}>
                 <Text style={styles.input}>Product Name</Text>
                 <TextInput 
                     placeholder='Product Name'
-                    value={name}
-                    onChangeText={(input) => setName(input)}
+                    value={input.name}
+                    onChangeText={(name) => setInput(oldInput => ({
+                        ...oldInput,
+                        name: name
+                    }))}
                     style={styles.input}
                 />
                 <Text style={styles.input}>Brand</Text>
                 <TextInput 
                     placeholder='Brand'
-                    value={brand}
-                    onChangeText={(input) => setBrand(input)}
+                    value={input.brand}
+                    onChangeText={(brand) => setInput(oldInput => ({
+                        ...oldInput,
+                        brand: brand
+                    }))}
                     style={styles.input}
                 />
                 <Text style={styles.input}>Price</Text>
                 <TextInput 
                     placeholder='Price'
-                    value={price}
-                    onChangeText={(input) => setPrice(input)}
+                    value={input.price}
+                    onChangeText={(price) => setInput(oldInput => ({
+                        ...oldInput,
+                        price: price
+                    }))}
                     style={styles.input}
                 />
                 <Text style={styles.input}>Category</Text>
                     <DropDownPicker 
                         open={openCategory}
-                        value={category}
-                        items={items}
+                        value={input.category}
+                        items={categories}
                         setOpen={setOpenCategory}
-                        setValue={setCategory}
-                        setItems={setItems}
+                        setValue={(callback) => {setInput(oldInput => ({
+                            ...oldInput,
+                            category: callback(input.category)
+                        }))}}
+                        setItems={setCategories}
                         zIndex={3000}
                         zIndexInverse={1000}
                     />
                 <Text style={styles.inputDropDown}>Vertical Position</Text>
                     <DropDownPicker 
                         open={openYPosition}
-                        value={yPosition}
+                        value={input.yPosition}
                         items={yPositions}
                         setOpen={setOpenYPosition}
-                        setValue={setYPosition}
+                        setValue={(callback) => setInput(oldInput => ({
+                            ...oldInput,
+                            yPosition: callback(input.yPosition)
+                        }))}
                         setItems={setYPositions}
                         zIndex={2000}
                         zIndexInverse={2000}
@@ -164,10 +153,13 @@ export default function EditProduct({navigation, route}) {
                 <Text style={styles.inputDropDown}>Horizontal Position</Text>
                     <DropDownPicker 
                         open={openXPosition}
-                        value={xPosition}
+                        value={input.xPosition}
                         items={xPositions}
                         setOpen={setOpenXPosition}
-                        setValue={setXPosition}
+                        setValue={(callback) => {setInput(oldInput => ({
+                            ...oldInput,
+                            xPosition: callback(input.xPosition)
+                        }))}}
                         setItems={setXPositions}
                         zIndex={1000}
                         zIndexInverse={3000}

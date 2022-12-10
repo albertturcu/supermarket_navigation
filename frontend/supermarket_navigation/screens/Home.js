@@ -11,6 +11,7 @@ export default function Home() {
             <Stack.Screen 
                 name="Search"
                 component={Search}
+                initialParams={{navigateTo: "PathView"}}
                 />
             <Stack.Screen 
                 name="PathView"

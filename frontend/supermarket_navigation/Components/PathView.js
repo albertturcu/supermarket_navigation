@@ -4,40 +4,42 @@ import { Text } from 'react-native-paper';
 import Svg, { Rect, Path } from 'react-native-svg';
 import { Node, Shelf, Product } from '../Models/LayoutModel'
 import {API_BASE_URL} from '@env'
+import StoreServices from '../services/storeServices';
 
-export default function PathView({navigation, route}) {
-    const [item, setItem] = useState(null)
+const api = new StoreServices
+
+export default function PathView({route}) {
+    const [item, setItem] = useState({name: null, brand: null, price: null, category: null})
     const [path, setPath] = useState(null)
     const [shelfLayout, setShelfLayout] = useState(null)
 
     useEffect(() => {
-        fetchProduct()
+        api.getProduct(route.params.id)
+            .then((response) => {
+                setItem({
+                    name: response.name,
+                    brand: response.brand,
+                    price: response.price,
+                    category: response.category
+                })
+                const pathForSVG = response.path.map((point) => {
+                    if (point != 0) {
+                        // add coordinates for SVG path, L stands for LineTo in SVG path
+                        return `L${GRAPH_NODES[point].x} ${GRAPH_NODES[point].y}`
+                    } else {
+                        // for the node 0, from which we start for now, add coordinates with M that stands for MoveTo since the path needs to start from here
+                        return `M${GRAPH_NODES[point].x} ${GRAPH_NODES[point].y}`
+                    }
+                })
+                setPath(pathForSVG.toString())
+                setShelfLayout(calculateSelectedShelfLayout(response.shelfHeight, response.shelfWidth, response.xPosition, response.yPosition))
+            })
+            .catch((error) => console.error(error))
     }, [])
 
-
-    const fetchProduct = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}` + 'product?id=' + route.params.id);
-            const json = await response.json();
-            setItem(json.data)
-            const pathForSVG = json.data.path.map((point) => {
-                if (point != 0) {
-                    // add coordinates for SVG path, L stands for LineTo in SVG path
-                    return `L${GRAPH_NODES[point].x} ${GRAPH_NODES[point].y}`
-                } else {
-                    // for the node 0, from which we start for now, add coordinates with M that stands for MoveTo since the path needs to start from here
-                    return `M${GRAPH_NODES[point].x} ${GRAPH_NODES[point].y}`
-                }
-            })
-            setPath(pathForSVG.toString())
-            setShelfLayout(calculateSelectedShelfLayout(json.data.shelf_height, json.data.shelf_width, json.data.position_y, json.data.position_x))
-        } catch (error) {
-            console.error(error)
-        }
-    }
     return (
         <View>
-            { item != null ?
+            { item.name != null ?
             <View>
                 <Text>Name: {item.name}</Text>
                 <Svg height='70%' width='100%' viewBox='0 0 180 380'>
