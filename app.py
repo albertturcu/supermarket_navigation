@@ -123,8 +123,17 @@ def category():
     statusCode = 200
 
     if request.method == 'GET':
-        data = get_categories()
-        print(data)
+        args = request.args
+        category_name = args.get('name')
+
+        print(category_name)
+        if category_name:
+            print("get emtpy spots for category " + category_name)
+            empty_spots = empty_spots_in_category(category_name)
+            data = empty_spots
+        else:
+            print("get all categories")
+            data = get_categories()
 
     return jsonify(isError= isError,
                 message= message,
