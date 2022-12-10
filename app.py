@@ -1,7 +1,6 @@
 from flask import Flask, request, url_for,render_template, redirect, jsonify
 from dijkstra.main import Graph
-from storage.db import Database
-from storage.models.product import get_similar_products, get_product, add_product, get_categories, update_product, count_similar_products
+from storage.models.product import get_similar_products, get_product, add_product, get_categories, update_product, count_similar_products, empty_spots_in_category
 from storage.models.paging import get_paginated_list
 import uuid
 
@@ -56,7 +55,12 @@ def product():
         print("GET")
         args = request.args
         product_id = args.get('id')
+        with_empty_spots = args.get('with_empty_spots', default=False, type=lambda v: v.lower() == 'true')
         data = get_product(product_id)
+
+        if with_empty_spots:
+            empty_spots = empty_spots_in_category(data['category'])
+            data['empty_spots'] = empty_spots
 
         g = Graph()
         start_point = int(0)
@@ -139,5 +143,4 @@ def health():
                 data=None), 200
 
 if __name__ == '__main__':
-    conn = Database()
     app.run(debug=True, port=5000)
