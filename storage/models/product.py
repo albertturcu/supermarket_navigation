@@ -114,14 +114,20 @@ def update_product(uniq_id, name, list_price, brand, category, position_x, posit
                 return er
 
         # update layout max width and height
-        query = "SELECT max(position_y) as max_position_y FROM products WHERE category='{}'".format(category)
-        c.execute(query)
-        rows = c.fetchall()
-        cols = [desc[0] for desc in c.description]
-        position_y = dict(zip(cols, rows[0]))
+        # query = "SELECT max(position_y) as max_position_y FROM products WHERE category='{}'".format(category)
+        # c.execute(query)
+        # rows = c.fetchall()
+        # cols = [desc[0] for desc in c.description]
+        # position_y = dict(zip(cols, rows[0]))
 
-        query = "UPDATE layout SET width = {}, height = {} WHERE category = '{}'".format(position_x, position_y['max_position_y'], category)
-        c.execute(query)
+        # query = "SELECT max(position_x) as max_position_x FROM products WHERE category='{}'".format(category)
+        # c.execute(query)
+        # rows = c.fetchall()
+        # cols = [desc[0] for desc in c.description]
+        # position_x = dict(zip(cols, rows[0]))
+
+        # query = "UPDATE layout SET width = {}, height = {} WHERE category = '{}'".format(position_x['max_position_x'], position_y['max_position_y'], category)
+        # c.execute(query)
 
     return None
 
