@@ -113,21 +113,14 @@ def update_product(uniq_id, name, list_price, brand, category, position_x, posit
             except Exception as er:
                 return er
 
-        # update layout max width and height
-        # query = "SELECT max(position_y) as max_position_y FROM products WHERE category='{}'".format(category)
-        # c.execute(query)
-        # rows = c.fetchall()
-        # cols = [desc[0] for desc in c.description]
-        # position_y = dict(zip(cols, rows[0]))
+        #update layout max width and height
+        query = "SELECT max(position_y) as max_position_y FROM products WHERE category='{}'".format(category)
+        c.execute(query)
+        rows = c.fetchall()
+        cols = [desc[0] for desc in c.description]
+        position_y = dict(zip(cols, rows[0]))
 
-        # query = "SELECT max(position_x) as max_position_x FROM products WHERE category='{}'".format(category)
-        # c.execute(query)
-        # rows = c.fetchall()
-        # cols = [desc[0] for desc in c.description]
-        # position_x = dict(zip(cols, rows[0]))
 
-        # query = "UPDATE layout SET width = {}, height = {} WHERE category = '{}'".format(position_x['max_position_x'], position_y['max_position_y'], category)
-        # c.execute(query)
 
     return None
 
@@ -180,6 +173,31 @@ def add_product(uniq_id, name, list_price, brand, category, position_x, position
     return None
 
 @with_connection
+def update_category(position_x, position_y, category, **kwargs):
+    c = kwargs.pop("connection").cursor()
+
+    query = "UPDATE layout SET width = {}, height = {} WHERE category = '{}'".format(position_x, position_y, category)
+    c.execute(query)
+
+    return None
+
+@with_connection
+def get_category(category, **kwargs):
+    c = kwargs.pop("connection").cursor()
+
+    query = "SELECT * FROM layout WHERE category LIKE '%{}%'".format(category)
+    c.execute(query)
+    rows = c.fetchall()
+
+    categories = []
+    for row in rows:
+        cols = [desc[0] for desc in c.description]
+        category = dict(zip(cols, row))
+        categories.append(category)
+
+    return categories
+
+@with_connection
 def get_categories(**kwargs):
     c = kwargs.pop("connection").cursor()
 
@@ -188,7 +206,7 @@ def get_categories(**kwargs):
 
     categories = []
     for row in rows:
-        categories.append(row[0])
+        categories.append(row)
 
     return categories
 
@@ -200,10 +218,10 @@ def empty_spots_in_category(category, **kwargs):
      with tmpVar as
 	(
         select
-            max(position_x) as max_x,
-            max(position_y) as max_y
+            width as max_x,
+            height as max_y
         from
-            products
+            layout
         where
             category = '{}')
 

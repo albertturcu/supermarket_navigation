@@ -1,6 +1,6 @@
 from flask import Flask, request, url_for,render_template, redirect, jsonify
 from dijkstra.main import Graph
-from storage.models.product import get_similar_products, get_product, add_product, get_categories, update_product, count_similar_products, empty_spots_in_category
+from storage.models.product import get_similar_products, get_product, add_product, get_categories, update_product, count_similar_products, empty_spots_in_category, update_category, get_category
 from storage.models.paging import get_paginated_list
 import uuid
 
@@ -112,9 +112,9 @@ def product():
                 statusCode= statusCode,
                 data= data), statusCode
 
-@app.route('/category', methods=['GET'])
+@app.route('/category', methods=['GET','PATCH'])
 def category():
-    data = None
+    data = {}
     isError = False
     message = "Success"
     statusCode = 200
@@ -127,10 +127,33 @@ def category():
         if category_name:
             print("get emtpy spots for category " + category_name)
             empty_spots = empty_spots_in_category(category_name)
-            data = empty_spots
+
+            category = get_category(category_name)
+            data['category'] = category
+            data['empty_spots'] = empty_spots
         else:
             print("get all categories")
             data = get_categories()
+
+    if request.method == 'PATCH':
+        json_data = request.get_json()
+
+        try:
+            name = json_data['category_name']
+            position_x = json_data['position_x']
+            position_y = json_data['position_y']
+        except KeyError as key_error:
+            statusCode = 400
+            message =   f"Missing required key {key_error}."
+            isError = True
+
+        if isError is False:
+            err = update_category(position_x, position_y, name)
+
+            if err is not None:
+                statusCode = 400
+                message = err
+                isError = True
 
     return jsonify(isError= isError,
                 message= message,
