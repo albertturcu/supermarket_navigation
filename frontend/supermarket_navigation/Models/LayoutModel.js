@@ -21,13 +21,15 @@ export class Node extends Coordinates {
  * @param {number} height Height of a shelf
  * @param {number} width Width of a shelf
  * @param {string} color Color of a shelf
+ * @param {string} name Name of the shelf(category name)
  */
 export class Shelf extends Coordinates {
-    constructor(x, y, height, width, color) {
+    constructor(x, y, height, width, color, name) {
         super(x, y)
         this.height = height
         this.width = width
         this.color = color
+        this.name = name
     }
 }
 

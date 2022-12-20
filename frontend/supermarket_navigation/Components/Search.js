@@ -21,7 +21,7 @@ export default function Search({ navigation, route }) {
 
   const defaultPageNumber = 1
   const [page, setPage] = useState(defaultPageNumber)
-  const limit = 10
+  const limit = 15
   
   const [searchResults, setSearchResults] = useState([])
 

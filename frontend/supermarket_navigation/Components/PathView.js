@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from 'react-native-paper';
-import Svg, { Rect, Path } from 'react-native-svg';
+import Svg, { Rect, Path, Text as TextSVG } from 'react-native-svg';
 import { Node, Shelf, Product } from '../Models/LayoutModel'
 import StoreServices from '../services/storeServices';
 
@@ -32,6 +32,7 @@ export default function PathView({route}) {
                 })
                 setPath(pathForSVG.toString())
                 setShelfLayout(calculateSelectedShelfLayout(response.shelfHeight, response.shelfWidth, response.xPosition, response.yPosition))
+                console.log(response.id)
             })
             .catch((error) => console.error(error))
     }, [])
@@ -52,9 +53,26 @@ export default function PathView({route}) {
                                     height={shelve.height}
                                     width={shelve.width}
                                     fill={shelve.color}
-                                />)
+                                />
+                            )
                         })
                     }
+                    {/* {
+                        shelves.map((shelve, key) => {
+                            return (// TODO FIGURE OUT THE TEXT...
+                                <TextSVG
+                                    key={key}
+                                    x={shelve.x}
+                                    y={shelve.y + 10}
+                                    textAnchor='baseline'
+                                    fontSize='7'
+                                    fontWeight={25}
+                                >
+                                    {shelve.name}
+                                </TextSVG>
+                            )
+                        })
+                    } */}
                     {
                         path != null ?
                             <Path 
@@ -109,24 +127,25 @@ const calculateSelectedShelfLayout = (shelfHeight, shelfWidth, selectedColumn, s
     let totalHeight = 100
 
     // start x,y coordinates from 0(top left corner)
-    var x = 0
-    var y = 0
+    let x = 0
+    let y = 0
 
     //calculate width and height of each product in the shelf
     let width = totalWidth / (shelfWidth + 1)
     let height = totalHeight / (shelfHeight + 1)
 
-    var productsArray = []
+    let productsArray = []
 
-    let selectedId = `${selectedColumn}-${selectedRow}`
+    let selectedId = `${selectedRow}-${selectedColumn}`
 
     // loop through the shelf width and height, which corresponds to how many rows and columns with items does the shelf have
-    for (var i=0; i<shelfHeight + 1; i++) {
-        for (var j=0; j<shelfWidth + 1; j++) {
+    for (let i=0; i<shelfHeight + 1; i++) {
+        for (let j=0; j<shelfWidth + 1; j++) {
             // need a unique id to assign as an element key when drawing svg
             let id = `${i}-${j}`
             let isSelected = id == selectedId ? true : false
             let tempProduct = new Product(id, x, y, height, width, isSelected)
+            console.log(tempProduct)
             productsArray.push(tempProduct)
             // increase the x for the next product in the same row
             x += width
@@ -140,41 +159,41 @@ const calculateSelectedShelfLayout = (shelfHeight, shelfWidth, selectedColumn, s
 }
 
 const shelves = [
-    new Shelf(0, 112, 97, 20, 'grey'),
-    new Shelf(0, 20, 70, 20, 'green'),
-    new Shelf(20, 0, 20, 38, 'green'),
-    new Shelf(50, 50, 20, 40, 'green'),
-    new Shelf(58, 0, 20, 52, 'green'),
-    new Shelf(90, 50, 20, 40, 'green'),
-    new Shelf(110, 0, 20, 30, 'green'),
-    new Shelf(140, 0, 20, 20, 'green'),
-    new Shelf(160, 20, 47, 20, 'green'),
-    new Shelf(160, 67, 47, 20, 'green'),
-    new Shelf(160, 114, 30, 20, 'green'),
-    new Shelf(160, 144, 30, 20, 'green'),
-    new Shelf(110, 120, 20, 20, 'green'),
-    new Shelf(70, 70, 20, 60, 'green'),
-    new Shelf(90, 120, 20, 20, 'green'),
-    new Shelf(70, 120, 20, 20, 'green'),
-    new Shelf(50, 70, 20, 20, 'green'),
-    new Shelf(50, 120, 20, 20, 'green'),
-    new Shelf(50, 140, 20, 40, 'green'),
-    new Shelf(50, 190, 20, 80, 'yellow'),
-    new Shelf(90, 140, 20, 40, 'green'),
-    new Shelf(160, 174, 30, 20, 'green'),
-    new Shelf(160, 204, 44, 20, 'pink'),
-    new Shelf(160, 248, 32, 20, 'lightblue'),
-    new Shelf(160, 280, 70, 20, 'red'),
-    new Shelf(130, 350, 20, 30, 'red'),
-    new Shelf(110, 315, 35, 20, 'red'),
-    new Shelf(110, 280, 35, 20, 'red'),
-    new Shelf(90, 260, 20, 40, 'blue'),
-    new Shelf(50, 210, 20, 80, 'yellow'),
-    new Shelf(50, 260, 20, 40, 'grey'),
-    new Shelf(50, 280, 70, 20, 'orange'),
-    new Shelf(20, 350, 20, 30, 'orange'),
-    new Shelf(0, 280, 70, 20, 'orange'),
-    new Shelf(0, 230, 50, 20, 'orange')
+    new Shelf(0, 112, 97, 20, 'grey', 'Checkout'),
+    new Shelf(0, 20, 70, 20, 'green', 'Seafood'),
+    new Shelf(20, 0, 20, 38, 'green', 'Milk'),
+    new Shelf(50, 50, 20, 40, 'green', 'Chocolate'),
+    new Shelf(58, 0, 20, 52, 'green', 'Fresh Meat'),
+    new Shelf(90, 50, 20, 40, 'green', 'Snacks'),
+    new Shelf(110, 0, 20, 30, 'green', 'Frozen Food'),
+    new Shelf(140, 0, 20, 20, 'green', 'Eggs & Cheese'),
+    new Shelf(160, 20, 47, 20, 'green', 'Fruits'),
+    new Shelf(160, 67, 47, 20, 'green', 'Vegetables'),
+    new Shelf(160, 114, 30, 20, 'green', 'Gluten-free'),
+    new Shelf(160, 144, 30, 20, 'green', 'Pasta'),
+    new Shelf(110, 120, 20, 20, 'green', 'Coffee'),
+    new Shelf(70, 70, 20, 60, 'green', 'Beverages'),
+    new Shelf(90, 120, 20, 20, 'green', 'Tea'),
+    new Shelf(70, 120, 20, 20, 'green', 'Spices'),
+    new Shelf(50, 70, 20, 20, 'green', 'Nuts'),
+    new Shelf(50, 120, 20, 20, 'green', 'Baking'),
+    new Shelf(50, 140, 20, 40, 'green', 'Canned Food'),
+    new Shelf(50, 190, 20, 80, 'yellow', 'Womens Wear'),
+    new Shelf(90, 140, 20, 40, 'green', 'Bakery & Bread'),
+    new Shelf(160, 174, 30, 20, 'green', 'Grains'),
+    new Shelf(160, 204, 44, 20, 'pink', 'Health & Beauty'),
+    new Shelf(160, 248, 32, 20, 'lightblue', 'Pet Care'),
+    new Shelf(160, 280, 70, 20, 'red', 'Automotive Replacement Parts'),
+    new Shelf(130, 350, 20, 30, 'red', 'Tires'),
+    new Shelf(110, 315, 35, 20, 'red', 'Motorcycle'),
+    new Shelf(110, 280, 35, 20, 'red', 'Automotive Interior Accessories'),
+    new Shelf(90, 260, 20, 40, 'blue', 'Toys'),
+    new Shelf(50, 210, 20, 80, 'yellow', 'Mens wear'),
+    new Shelf(50, 260, 20, 40, 'grey', 'Electronics'),
+    new Shelf(50, 280, 70, 20, 'orange', 'Insect & Pest Control'),
+    new Shelf(20, 350, 20, 30, 'orange', 'Outdoor decor'),
+    new Shelf(0, 280, 70, 20, 'orange', 'Garden Furniture'),
+    new Shelf(0, 230, 50, 20, 'orange', 'Household')
 ]
 
 const GRAPH_NODES =  {

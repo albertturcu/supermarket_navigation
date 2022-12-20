@@ -69,6 +69,7 @@ export default function AddProduct() {
             <TextInput 
                 placeholder='Product Name'
                 value={input.name}
+                multiline={true}
                 onChangeText={(name) => setInput(oldInput => ({
                     ...oldInput,
                     name: name

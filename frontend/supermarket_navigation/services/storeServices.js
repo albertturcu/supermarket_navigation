@@ -32,6 +32,22 @@ export default class StoreServices {
                 .catch((error) => reject(error))
         })
     }
+    getEmptySpacesForCategory(category) {
+        return new Promise((resolve, reject) => {
+            fetch(`${API_BASE_URL}` + 'category?name=' + category)
+                .then((response) => response.json())
+                .then((json) => {
+                    if (json.isError) {
+                        console.error(json.message)
+                    } else {
+                        // filter out occupied spots on shelf
+                        const emptySpaces = json.data.filter((spot) => spot.uniq_id === null)
+                        resolve(emptySpaces)
+                    }
+                })
+                .catch((error) => reject(error))
+        })
+    }
     getProduct(id) {
         return new Promise((resolve, reject) => {
             fetch(`${API_BASE_URL}` + 'product?id=' + id)

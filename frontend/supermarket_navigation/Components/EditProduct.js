@@ -13,12 +13,10 @@ export default function EditProduct({navigation, route}) {
     // category dropdown state
     const [openCategory, setOpenCategory] = useState(false)
     const [categories, setCategories] = useState([])
-    // y position drowdown state
-    const [openYPosition, setOpenYPosition] = useState(false)
-    const [yPositions, setYPositions] = useState([])
-    // x position drowdown state
-    const [openXPosition, setOpenXPosition] = useState(false)
-    const [xPositions, setXPositions] = useState([])
+
+    const [emptySpaces, setEmptySpaces] = useState([])
+    const [openEmptySpaces, setOpenEmptySpaces] = useState(false)
+    const [selectedSpot, setSelectedSpot] = useState(null)
 
     // dialog state
     const [visible, setVisible] = React.useState(false);
@@ -51,24 +49,42 @@ export default function EditProduct({navigation, route}) {
                     xPosition: response.xPosition,
                     yPosition: response.yPosition
                 })
-                // iterate over shelfWidth to show all x positions for dropdown
-                let tempXPositions = []
-                for (let i=1; i<=response.shelfWidth+1; i++) {
-                    tempXPositions.push(new DropdownElement(i, i))
-                }
-                // iterate over shelfHeight to show all y positions for dropdown
-                let tempYPositions = []
-                for (let i=1; i<=response.shelfHeight+1; i++) {
-                    tempYPositions.push(new DropdownElement(i, i))
-                }
-                setXPositions(tempXPositions)
-                setYPositions(tempYPositions)
             })
             .catch((error) => console.error(error))
     }, [])
 
+    useEffect(() => {
+        api.getEmptySpacesForCategory(input.category)
+            .then((response) => {
+                let tempEmpty = []
+                // iterate over the response array and create dropdown elements
+                for (let i=0; i<response.length; i++) {
+                    const value = i
+                    const y = response[i].shelf_position_y + 1
+                    const x = response[i].shelf_position_x + 1
+                    const label = x + '-' + y
+                    tempEmpty.push(new DropdownElement(label, value))
+                }
+                setEmptySpaces(tempEmpty)})
+            .catch((error) => console.error(error))
+    }, [input.category])
+
+    // update the x and y position on input object every time the selected spot changes
+    useEffect(() => {
+        if (selectedSpot != null) {
+            // selected spot return the value, value represents the index in emptySpaces array
+            const label = emptySpaces[selectedSpot].label
+            const split = label.split('-')
+            setInput(oldInput => ({
+                ...oldInput,
+                xPosition: split[0] - 1,
+                yPosition: split[1] - 1
+            }))
+        }
+    }, [selectedSpot])
 
     const editProduct = () => {
+        console.log(input)
         api.editProduct(input)
             .then(navigation.goBack())
             .catch((error) => {
@@ -95,6 +111,7 @@ export default function EditProduct({navigation, route}) {
                 <TextInput 
                     placeholder='Product Name'
                     value={input.name}
+                    multiline={true}
                     onChangeText={(name) => setInput(oldInput => ({
                         ...oldInput,
                         name: name
@@ -122,49 +139,31 @@ export default function EditProduct({navigation, route}) {
                     style={styles.input}
                 />
                 <Text style={styles.input}>Category</Text>
-                    <DropDownPicker 
-                        open={openCategory}
-                        value={input.category}
-                        items={categories}
-                        setOpen={setOpenCategory}
-                        setValue={(callback) => {setInput(oldInput => ({
-                            ...oldInput,
-                            category: callback(input.category)
-                        }))}}
-                        setItems={setCategories}
-                        zIndex={3000}
-                        zIndexInverse={1000}
-                    />
-                <Text style={styles.inputDropDown}>Vertical Position</Text>
-                    <DropDownPicker 
-                        open={openYPosition}
-                        value={input.yPosition}
-                        items={yPositions}
-                        setOpen={setOpenYPosition}
-                        setValue={(callback) => setInput(oldInput => ({
-                            ...oldInput,
-                            yPosition: callback(input.yPosition)
-                        }))}
-                        setItems={setYPositions}
-                        zIndex={2000}
-                        zIndexInverse={2000}
-                        bottomOffset={100}
-                    />
-                <Text style={styles.inputDropDown}>Horizontal Position</Text>
-                    <DropDownPicker 
-                        open={openXPosition}
-                        value={input.xPosition}
-                        items={xPositions}
-                        setOpen={setOpenXPosition}
-                        setValue={(callback) => {setInput(oldInput => ({
-                            ...oldInput,
-                            xPosition: callback(input.xPosition)
-                        }))}}
-                        setItems={setXPositions}
-                        zIndex={1000}
-                        zIndexInverse={3000}
-                        bottomOffset={100}
-                    />
+                <DropDownPicker 
+                    open={openCategory}
+                    value={input.category}
+                    items={categories}
+                    setOpen={setOpenCategory}
+                    setValue={(callback) => {setInput(oldInput => ({
+                        ...oldInput,
+                        category: callback(input.category)
+                    }))}}
+                    setItems={setCategories}
+                    zIndex={3000}
+                    zIndexInverse={1000}
+                />
+                <Text style={styles.inputDropDown}>Available Spots</Text>
+                <DropDownPicker 
+                    open={openEmptySpaces}
+                    value={selectedSpot}
+                    items={emptySpaces}
+                    setOpen={setOpenEmptySpaces}
+                    setValue={setSelectedSpot}
+                    setItems={setEmptySpaces}
+                    zIndex={1000}
+                    zIndexInverse={3000}
+                    bottomOffset={100}
+                />
                 <Button onPress={() => editProduct()} style={styles.submitButton}>Edit Product</Button>
             </View>
         </SafeAreaView>
