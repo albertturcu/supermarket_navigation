@@ -1,17 +1,18 @@
-import sqlite3
+import psycopg2
 
-class Database():
-    def __init__(self, connection_string='supermarket.db'):
-        self.connection_string = connection_string
-        self.connector = None
-
-    def __enter__(self):
-        self.connector = sqlite3.connect(self.connection_string)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_tb is None:
-            self.connector.commit()
+def with_connection(f):
+    def with_connection_(*args, **kwargs):
+        connection_string='postgresql://SUEPRMARKET_telephone:2fd423a1c6d6075602a04eb87251b35db80ddc49@tce.h.filess.io:5432/SUEPRMARKET_telephone'
+        conn = psycopg2.connect(connection_string)
+        try:
+            result = f(*args, connection=conn, **kwargs)
+        except:
+            conn.rollback()
+            print("SQL failed")
+            raise
         else:
-            self.connector.rollback()
-        self.connector.close()
+            conn.commit()
+        finally:
+            conn.close()
+        return result
+    return with_connection_

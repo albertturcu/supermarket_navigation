@@ -1,7 +1,6 @@
 from flask import Flask, request, url_for,render_template, redirect, jsonify
 from dijkstra.main import Graph
-from storage.db import Database
-from storage.models.product import get_similar_products, get_product, add_product, get_categories, update_product, count_similar_products
+from storage.models.product import get_similar_products, get_product, add_product, get_categories, update_product, count_similar_products, empty_spots_in_category, update_category, get_category
 from storage.models.paging import get_paginated_list
 import uuid
 
@@ -74,8 +73,10 @@ def product():
         list_price = json_data['list_price']
         brand = json_data['brand']
         category = json_data['category']
+        position_x = json_data['position_x']
+        position_y = json_data['position_y']
 
-        err = add_product(uniq_id, name, list_price, brand, category)
+        err = add_product(uniq_id, name, list_price, brand, category, position_x, position_y)
         if err is not None:
             statusCode = 400
             message = err
@@ -111,16 +112,48 @@ def product():
                 statusCode= statusCode,
                 data= data), statusCode
 
-@app.route('/category', methods=['GET'])
+@app.route('/category', methods=['GET','PATCH'])
 def category():
-    data = None
+    data = {}
     isError = False
     message = "Success"
     statusCode = 200
 
     if request.method == 'GET':
-        data = get_categories()
-        print(data)
+        args = request.args
+        category_name = args.get('name')
+
+        print(category_name)
+        if category_name:
+            print("get emtpy spots for category " + category_name)
+            empty_spots = empty_spots_in_category(category_name)
+
+            category = get_category(category_name)
+            data['category'] = category
+            data['empty_spots'] = empty_spots
+        else:
+            print("get all categories")
+            data = get_categories()
+
+    if request.method == 'PATCH':
+        json_data = request.get_json()
+
+        try:
+            name = json_data['category_name']
+            position_x = json_data['position_x']
+            position_y = json_data['position_y']
+        except KeyError as key_error:
+            statusCode = 400
+            message =   f"Missing required key {key_error}."
+            isError = True
+
+        if isError is False:
+            err = update_category(position_x, position_y, name)
+
+            if err is not None:
+                statusCode = 400
+                message = err
+                isError = True
 
     return jsonify(isError= isError,
                 message= message,
@@ -139,5 +172,4 @@ def health():
                 data=None), 200
 
 if __name__ == '__main__':
-    conn = Database()
     app.run(debug=True, port=5000)
