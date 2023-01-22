@@ -1,6 +1,13 @@
 import {API_BASE_URL} from '@env'
 import {BackendProduct, FrontendProduct} from '../Models/DataModels'
 
+class Category {
+    constructor(width, height, category) {
+        this.position_x = width
+        this.position_y = height
+        this.category_name = category
+    }
+}
 export default class StoreServices {
     // API product PATCH method
     editProduct(input) {
@@ -46,6 +53,42 @@ export default class StoreServices {
                     }
                 })
                 .catch((error) => reject(error))
+        })
+    }
+    getShelfDimensions(category) {
+        return new Promise((resolve, reject) => {
+            fetch(`${API_BASE_URL}` + 'category?name=' + category)
+                .then((response) => response.json())
+                .then((json) => {
+                    if (json.isError) {
+                        reject(json.message)
+                    } else {
+                        const width = json.data.category[0].width
+                        const height = json.data.category[0].height
+                        resolve({width, height})
+                    }
+                })
+                .catch((error) => reject(error))
+        })
+    }
+    extendShelfWidth(width, height, category) {
+        const payload = new Category(width, height, category)
+        console.log("payload" , payload)
+        return new Promise((resolve, reject) => {
+            fetch(`${API_BASE_URL}` + 'category', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then((response) => response.json())
+            .then((json) => {
+                json.isError ? reject(json.message) : resolve()
+            })
+            .catch((error) => {
+                reject(error)
+            })
         })
     }
     getProduct(id) {

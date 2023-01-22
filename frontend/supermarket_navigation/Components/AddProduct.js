@@ -19,11 +19,14 @@ export default function AddProduct() {
     const [selectedSpot, setSelectedSpot] = useState(null)
 
     // dialog state
-    const [visible, setVisible] = React.useState(false);
+    const [visible, setVisible] = useState(false)
+    const [visibleAddingSpaces, setVisibleAddingSpaces] = useState(false)
 
-    const showDialog = () => setVisible(true);
+    const showDialog = () => setVisible(true)
+    const showDialogAddingSpaces = () => setVisibleAddingSpaces(true)
 
-    const hideDialog = () => setVisible(false);
+    const hideDialog = () => setVisible(false)
+    const hideDialogAddingSpaces = () => setVisibleAddingSpaces(false)
 
     useEffect(() => {
         api.getAllCategories()
@@ -43,22 +46,27 @@ export default function AddProduct() {
     }, [])
 
     useEffect(() => {
-        console.log(categories)
+        setEmptySpaces([])
+        setSelectedSpot(null)
         api.getEmptySpacesForCategory(input.category)
             .then((response) => {
-                let tempEmpty = []
-                // iterate over the response array and create dropdown elements
-                for (let i=0; i<response.length; i++) {
-                    const value = i
-                    const y = response[i].shelf_position_y + 1
-                    const x = response[i].shelf_position_x + 1
-                    const label = x + '-' + y
-                    tempEmpty.push(new DropdownElement(label, value))
+                if (response.length != 0) {
+                    let tempEmpty = []
+                    // iterate over the response array and create dropdown elements
+                    for (let i=0; i<response.length; i++) {
+                        const value = i
+                        const y = response[i].shelf_position_y + 1
+                        const x = response[i].shelf_position_x + 1
+                        const label = x + '-' + y
+                        tempEmpty.push(new DropdownElement(label, value))
+                    }
+                    setEmptySpaces(tempEmpty)
+                } else if (input.category != null) {
+                    showDialogAddingSpaces()
                 }
-                setEmptySpaces(tempEmpty)
             })
             .catch((error) => console.error(error))
-    }, [input.category])
+    }, [input.category, visibleAddingSpaces])
 
     // update the x and y position on input object every time the selected spot changes
     useEffect(() => {
@@ -75,7 +83,6 @@ export default function AddProduct() {
     }, [selectedSpot])
 
     const addProduct = () => {
-        console.log(input)
         api.addProduct(input)
             .then(() => {
                 setInput({
@@ -86,9 +93,30 @@ export default function AddProduct() {
                     xPosition: null,
                     yPosition: null
                 })
+                setEmptySpaces([])
+                setSelectedSpot(null)
             })
             .catch((error) => {
                 showDialog()
+                console.error(error)
+            })
+    }
+
+    const addColumnOnShelf = () => {
+        var width
+        var height
+        api.getShelfDimensions(input.category)
+            .then((response) => {
+                width = response.width + 1
+                height = response.height
+                api.extendShelfWidth(width, height, input.category)
+                setInput(oldInput => ({
+                    ...oldInput,
+                    category: input.category
+                }))
+                hideDialogAddingSpaces()
+            })
+            .catch((error) => {
                 console.error(error)
             })
     }
@@ -103,6 +131,16 @@ export default function AddProduct() {
                     </Dialog.Content>
                     <Dialog.Actions>
                     <Button onPress={hideDialog}>Ok</Button>
+                    </Dialog.Actions>
+                </Dialog>
+                <Dialog visible={visibleAddingSpaces} onDismiss={hideDialogAddingSpaces}>
+                    <Dialog.Title>No more space on the shelf!</Dialog.Title>
+                    <Dialog.Content>
+                    <Paragraph>The shelf you have selected has no empty space. Do you wish to increase the width of the shelf?</Paragraph>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={hideDialogAddingSpaces}>Cancel</Button>
+                        <Button onPress={addColumnOnShelf}>Yes</Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
