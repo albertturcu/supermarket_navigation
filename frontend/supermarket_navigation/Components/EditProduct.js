@@ -54,7 +54,8 @@ export default function EditProduct({navigation, route}) {
     }, [])
 
     useEffect(() => {
-        api.getEmptySpacesForCategory(input.category)
+        if (input.category != null) {
+            api.getEmptySpacesForCategory(input.category)
             .then((response) => {
                 let tempEmpty = []
                 // iterate over the response array and create dropdown elements
@@ -67,6 +68,7 @@ export default function EditProduct({navigation, route}) {
                 }
                 setEmptySpaces(tempEmpty)})
             .catch((error) => console.error(error))
+        }
     }, [input.category])
 
     // update the x and y position on input object every time the selected spot changes

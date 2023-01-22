@@ -38,10 +38,10 @@ export default class StoreServices {
                 .then((response) => response.json())
                 .then((json) => {
                     if (json.isError) {
-                        console.error(json.message)
+                        reject(json.message)
                     } else {
                         // filter out occupied spots on shelf
-                        const emptySpaces = json.data.filter((spot) => spot.uniq_id === null)
+                        const emptySpaces = json.data.empty_spots.filter((spot) => spot.uniq_id === null)
                         resolve(emptySpaces)
                     }
                 })
@@ -66,7 +66,8 @@ export default class StoreServices {
     }
     addProduct(input) {
         return new Promise((resolve, reject) => {
-            const payload = new BackendProduct(null, input.name, input.brand, input.price, input.category, null, null)
+            const payload = new BackendProduct(null, input.name, input.brand, input.price, input.category, input.xPosition, input.yPosition)
+            console.log(payload)
             fetch(`${API_BASE_URL}` + 'product', {
                 method: 'POST',
                 headers: {
