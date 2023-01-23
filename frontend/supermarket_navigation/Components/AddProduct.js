@@ -26,7 +26,14 @@ export default function AddProduct() {
     const showDialogAddingSpaces = () => setVisibleAddingSpaces(true)
 
     const hideDialog = () => setVisible(false)
-    const hideDialogAddingSpaces = () => setVisibleAddingSpaces(false)
+    const hideDialogAddingSpaces = () => {
+        setVisibleAddingSpaces(false)
+        setInput(oldInput => ({
+            ...oldInput,
+            category: null
+        }))
+    }
+    const hideDialogAddingSpacesWithoutReset = () => setVisibleAddingSpaces(false)
 
     useEffect(() => {
         api.getAllCategories()
@@ -48,7 +55,7 @@ export default function AddProduct() {
     useEffect(() => {
         setEmptySpaces([])
         setSelectedSpot(null)
-        api.getEmptySpacesForCategory(input.category)
+        api.getEmptySpacesForCategory(input.category, null)
             .then((response) => {
                 if (response.length != 0) {
                     let tempEmpty = []
@@ -103,8 +110,8 @@ export default function AddProduct() {
     }
 
     const addColumnOnShelf = () => {
-        var width
-        var height
+        let width
+        let height
         api.getShelfDimensions(input.category)
             .then((response) => {
                 width = response.width + 1
@@ -114,7 +121,7 @@ export default function AddProduct() {
                     ...oldInput,
                     category: input.category
                 }))
-                hideDialogAddingSpaces()
+                hideDialogAddingSpacesWithoutReset()
             })
             .catch((error) => {
                 console.error(error)
@@ -188,7 +195,7 @@ export default function AddProduct() {
                 setItems={setCategories}
             />
             <Text style={styles.inputDropDown}>Available Spots</Text>
-                <DropDownPicker 
+                <DropDownPicker
                     open={openEmptySpaces}
                     value={selectedSpot}
                     items={emptySpaces}
@@ -214,6 +221,10 @@ const styles = StyleSheet.create({
         padding: 20
     },
     input: {
+        marginBottom: 10
+    },
+    inputDropDown: {
+        marginTop: 10,
         marginBottom: 10
     },
     submitButton: {

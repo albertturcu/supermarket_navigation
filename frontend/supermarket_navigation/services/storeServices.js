@@ -39,7 +39,7 @@ export default class StoreServices {
                 .catch((error) => reject(error))
         })
     }
-    getEmptySpacesForCategory(category) {
+    getEmptySpacesForCategory(category, id) {
         return new Promise((resolve, reject) => {
             fetch(`${API_BASE_URL}` + 'category?name=' + category)
                 .then((response) => response.json())
@@ -47,8 +47,8 @@ export default class StoreServices {
                     if (json.isError) {
                         reject(json.message)
                     } else {
-                        // filter out occupied spots on shelf
-                        const emptySpaces = json.data.empty_spots.filter((spot) => spot.uniq_id === null)
+                        // filter out occupied spots on shelf but include own spot
+                        const emptySpaces = json.data.empty_spots.filter((spot) => spot.uniq_id === null || spot.uniq_id === id)
                         resolve(emptySpaces)
                     }
                 })
